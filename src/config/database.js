@@ -3,22 +3,24 @@ const env = require('./environment.js');
 const defaultConfig = {
   databaseUrl: env.DATABASE_URL,
   dialect: env.DATABASE_DIALECT || 'postgres',
-  use_env_variable: 'DATABASE_URL'
+  use_env_variable: 'DATABASE_URL',
 };
 
 const database = {
   development: {
-    ...defaultConfig
+    ...defaultConfig,
   },
   test: {
-    ...defaultConfig
+    ...defaultConfig,
+    databaseUrl: env.DATABASE_URL_TEST,
+    use_env_variable: 'DATABASE_URL_TEST',
   },
   staging: {
-    ...defaultConfig
+    ...defaultConfig,
   },
   production: {
-    ...defaultConfig
-  }
+    ...defaultConfig,
+  },
 };
 
 // DO NOT CHANGE EVER!!!
