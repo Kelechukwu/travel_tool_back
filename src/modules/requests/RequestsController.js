@@ -1,7 +1,8 @@
-import { Op } from 'sequelize';
 import models from '../../database/models';
 import Pagination from '../../helpers/Pagination';
 import Utils from '../../helpers/Utils';
+import { createSubquery, countByStatus } from '../../helpers/requests';
+import handleServerError from '../../helpers/serverError';
 
 class RequestsController {
   // query with the db
@@ -19,72 +20,21 @@ class RequestsController {
         request: newRequest,
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: 'Server error',
-      });
+      /* istanbul ignore next */
+      handleServerError(error, res);
     }
-  }
-
-  // fetch requests api
-  static buildRequestQuery(req, limit, offset) {
-    const { status } = req.query;
-    const userId = req.user.UserInfo.id;
-    const query = {
-      where: {
-        userId,
-      },
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']],
-    };
-    if (status) {
-      if (status === 'past') {
-        query.where.status = {
-          [Op.ne]: 'Open',
-        };
-      } else {
-        query.where.status = {
-          [Op.iLike]: status,
-        };
-      }
-    }
-    return query;
-  }
-
-  static async getRequestsCountData(userId) {
-    const openRequestsCount = await models.Request.count({
-      where: {
-        status: 'Open',
-        userId,
-      },
-    });
-
-    const pastRequestsCount = await models.Request.count({
-      where: {
-        status: { [Op.ne]: 'Open' },
-        userId,
-      },
-    });
-
-    const count = {
-      open: openRequestsCount,
-      past: pastRequestsCount,
-    };
-
-    return count;
   }
 
   static async getUserRequests(req, res) {
     const userId = req.user.UserInfo.id;
     const { status } = req.query.status || '';
     const { page, limit, offset } = Pagination.initializePagination(req);
-    const query = RequestsController.buildRequestQuery(req, limit, offset);
+    const subquery = createSubquery(req, limit, offset, 'Request');
     try {
-      const requests = await models.Request.findAndCountAll(query);
-      const count = await RequestsController.getRequestsCountData(userId);
+      const requests = await models.Request.findAndCountAll(subquery);
+      const count = await countByStatus(models.Request, userId);
       const pagination = Pagination.getPaginationData(page, limit, requests);
-      const message = Utils.getRequestResponseMessage(pagination, status);
+      const message = Utils.getResponseMessage(pagination, status, 'Request');
       return res.status(200).json({
         success: true,
         message,
@@ -95,10 +45,8 @@ class RequestsController {
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: 'Server error',
-      });
+      /* istanbul ignore next */
+      return handleServerError(error, res);
     }
   }
 }

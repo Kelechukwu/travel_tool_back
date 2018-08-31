@@ -2,7 +2,7 @@
 
 import supertest from 'supertest';
 import models from '../../../database/models';
-import app from '../../../index';
+import app from '../../../app';
 import testRequests from './mocks/mockData';
 import Utils from '../../../helpers/Utils';
 
@@ -162,7 +162,7 @@ describe('Requests Controller', () => {
           status: 200,
           body: {
             success: true,
-            message: 'No data exists for this page',
+            message: 'No requests exists for this page',
             requests: [],
             meta: {
               count: {

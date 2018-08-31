@@ -1,11 +1,14 @@
 import express from 'express';
-import { authenticate, Validator } from '../../middlewares';
+import middleware from '../../middlewares';
 import validators from '../../helpers/validators';
 import RequestsController from './RequestsController';
+import ApprovalsController from './approvals';
 
-const Router = express.Router();
+const RequestsRouter = express.Router();
 
-Router.get(
+const { authenticate, Validator } = middleware;
+
+RequestsRouter.get(
   '/requests',
   authenticate,
   validators,
@@ -13,11 +16,17 @@ Router.get(
   RequestsController.getUserRequests,
 );
 
-Router.post(
+RequestsRouter.post(
   '/requests',
   authenticate,
   Validator.validateCreateRequests, // check req.body
   RequestsController.createRequest,
 );
 
-export default Router;
+RequestsRouter.get(
+  '/requests/my-approvals',
+  authenticate,
+  ApprovalsController.getUserApprovals,
+);
+
+export default RequestsRouter;
