@@ -10,6 +10,7 @@ const validateDirectReport = async (req, res, next) => {
       error: 'Request not found',
     });
   }
+  // FIX: replace name with Id
   if (user.UserInfo.name !== request.manager) {
     return res.status(403).json({
       success: false,

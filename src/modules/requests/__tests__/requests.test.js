@@ -533,6 +533,37 @@ describe('Requests Controller', () => {
         });
     });
 
+    describe('Not Requesters Manager', () => {
+      //  create request if everything is fine
+      it('should return an error message', async () => {
+        const newRequest = {
+          newStatus: 'Rejected',
+        };
+        const res = await request(app)
+          .put('/api/v1/approvals/xDh20cuGy')
+          .set('authorization', nonRequestManagerToken)
+          .send({ ...newRequest });
+        expect(res.status).toBe(403);
+        expect(res.body).toMatchObject({
+          success: false,
+          error: 'Permission denied, you are not requesters manager',
+        });
+      });
+    });
+
+    describe('Requesters Manager', () => {
+      it('should not update a requests status twice',
+      async () => {
+        const res = await request(app)
+          .put('/api/v1/approvals/xDh20cuGy')
+        .set('authorization', token)
+        .send({ newStatus: 'Approved' });
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.success).toEqual(false);
+        expect(res.body.message).toEqual('Request has been Approved already')
+      });
+    });
+
     describe('Unauthenticated User', () => {
       it('should check if the token exists and return 401 if it does not',
         async () => {
@@ -554,24 +585,6 @@ describe('Requests Controller', () => {
           expect(res.body.success).toEqual(false);
           expect(res.body.error).toEqual('Token is not valid');
         });
-    });
-
-    describe('Not Requesters Manager', () => {
-      //  create request if everything is fine
-      it('should return an error message', async () => {
-        const newRequest = {
-          newStatus: 'Rejected',
-        };
-        const res = await request(app)
-          .put('/api/v1/approvals/xDh20cuGy')
-          .set('authorization', nonRequestManagerToken)
-          .send({ ...newRequest });
-        expect(res.status).toBe(403);
-        expect(res.body).toMatchObject({
-          success: false,
-          error: 'Permission denied, you are not requesters manager',
-        });
-      });
     });
   });// end of UPDATE REQUEST STATUS API
 });
