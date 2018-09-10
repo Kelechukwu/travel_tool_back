@@ -8,11 +8,18 @@ import dotenv from 'dotenv';
 import expressValidator from 'express-validator';
 import modules from './modules';
 import env from './config/environment';
+import bugsnag from 'bugsnag';
 
 dotenv.config();
 
 const logger = debug('log');
 const app = express();
+
+if (process.env.BUGSNAG_API_KEY) {
+  bugsnag.register(process.env.BUGSNAG_API_KEY);
+  app.use(bugsnag.requestHandler);
+  app.use(bugsnag.errorHandler);
+}
 
 app.use(cors());
 app.use(morgan('dev'));

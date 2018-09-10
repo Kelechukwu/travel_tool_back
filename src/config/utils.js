@@ -4,6 +4,7 @@ const optionalEnvVariables = [
   'DATABASE_HOST',
   'DATABASE_PORT',
   'DATABASE_PASSWORD',
+  'BUGSNAG_API_KEY',
 ];
 
 module.exports = (env) => {
